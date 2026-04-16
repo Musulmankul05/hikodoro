@@ -1,7 +1,5 @@
-from pydoc import text
-
 import customtkinter as ctk
-
+from playsound3 import playsound
 
 class App(ctk.CTk):
     def __init__(self):
@@ -35,23 +33,38 @@ class App(ctk.CTk):
                                           command=self.pause_timer, state="disabled", 
                                           fg_color="darkgray", hover_color="gray")
         self.pause_button.grid(row=2, column=1, padx=20, pady=20)
-        self.debug_button = ctk.CTkButton(self, text="Print", font=("Arial", 24), command=lambda: print(self.running))
-        self.debug_button.grid(row=3, column=0, columnspan=2)
+        # self.debug_button = ctk.CTkButton(self, text="Print", font=("Arial", 24), command=lambda: print(self.running))
+        # self.debug_button.grid(row=3, column=0, columnspan=2)
         
 
     def start_timer(self):
         if not self.running:
             self.running = True
+            self.paused = False
             self.timer.configure(text_color="white")
-            self.pause_button.configure(state="normal")
-            self.start_button.configure(self, text="  ")
+            self.pause_button.configure(state="normal", text="  ")
+            self.start_button.configure(self, text="  ", state="disabled")
             self.update_timer()
+            
+        if self.running and self.paused:
+            self.running = False
+            self.paused = False
+            self.breaktime = False
+            self.sessions = 0
+            self.time = 25 * 60
+
+            self.timer.configure(text=f"{self.time // 60:02d}:{self.time % 60:02d}", text_color="gray")
+            self.start_button.configure(text="  ", state="normal")
+            self.pause_button.configure(state="disabled", text="  ")
+            self.session.configure(text=" ")
+
 
 
     def pause_timer(self):
         if self.running:
             self.paused = not self.paused
             if self.paused:
+                self.start_button.configure(text="  ", state="normal")
                 self.pause_button.configure(text="  ")
                 self.timer.configure(text_color="gray")
             else:
@@ -66,14 +79,15 @@ class App(ctk.CTk):
                 self.timer.configure(text=f"{self.time // 60:02d}:{self.time % 60:02d}")
                 self.after(1000, self.update_timer)
             elif self.breaktime:
+                playsound("breakover.mp3", block=False)
                 self.breaktime = False
                 self.time = (25 * 60) + 1
                 self.after(1000, self.update_timer)
             else:
+                playsound("timeover.mp3", block=False)
                 self.breaktime = True
                 self.time = (5 * 60) + 1
                 self.sessions += 1
-                print(self.sessions)
                 self.session.configure(text="" + (" " * self.sessions))
                 self.after(0, self.update_timer)
 
