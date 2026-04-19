@@ -1,6 +1,7 @@
-import os, json
+import os, json, pyglet
 import customtkinter as ctk
 from playsound3 import playsound
+from pathlib import Path
 
 
 CONFIG_FILE = "conf.json"
@@ -8,10 +9,9 @@ CONFIG_FILE = "conf.json"
 def load_config():
     default_config = {
         "window-width": 200,
-        "window-height": 180,
+        "window-height": 120,
         "WORKTIME": 1500, 
         "BREAKTIME": 300,
-        "FONT": "Liga SFMono Nerd Font"
     }
     
     if not os.path.exists(CONFIG_FILE):
@@ -26,12 +26,14 @@ def load_config():
         return default_config
     
 conf = load_config()
+font_path = Path(__file__).parent / "LigaSFMonoNerdFont-Bold.otf"
+pyglet.font.add_file(str(font_path))
 
 WORK_TIME = conf.get("WORKTIME", 1500)
 BREAK_TIME = conf.get("BREAKTIME", 300)
-FONT_NAME = conf.get("FONT", "Liga SFMono Nerd Font")
 WINDOW_WIDTH = conf.get("window-width", 200)
 WINDOW_HEIGHT = conf.get("window-height", 180)
+FONT_NAME = "Liga SFMono Nerd Font"
 
 class App(ctk.CTk):
     def __init__(self):

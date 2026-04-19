@@ -2,6 +2,10 @@
     "window-width": 190,
     "window-height": 120,
     "WORKTIME": 7, 
+<<<<<<< HEAD
     "BREAKTIME": 300,
     "FONT": "Liga SFMono Nerd Font"
+=======
+    "BREAKTIME": 300
+>>>>>>> 7e9c15b (fix)
 }
