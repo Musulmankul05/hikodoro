@@ -4,3 +4,5 @@
 
 Spawns at the right-bottom screen\
 Configuration (times, screen size) in `config.json` file
+
+## Use with Hyprland and window decorations off for better experience
