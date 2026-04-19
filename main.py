@@ -1,11 +1,10 @@
-import os, json, pyglet
+import os, json, pyglet, threading
 import customtkinter as ctk
 from playsound3 import playsound
 from pathlib import Path
 
 
 CONFIG_FILE = "conf.json"
-
 def load_config():
     default_config = {
         "window-width": 200,
@@ -52,9 +51,8 @@ class App(ctk.CTk):
         self.setup_ui()
 
     def setup_ui(self):
-        """Создаем все виджеты здесь, чтобы не захламлять __init__"""
         self.session_label = ctk.CTkLabel(self, text=" ", font=(FONT_NAME, 15), height=1)
-        self.session_label.grid(row=0, column=0, padx=5, pady=0, sticky="ew")
+        self.session_label.grid(row=0, column=0, padx=0, pady=(5, 0), sticky="ew")
 
         timer_font = ctk.CTkFont(family=FONT_NAME, size=45, weight="bold")
         self.timer_label = ctk.CTkLabel(self, text=self.format_time(), font=timer_font, text_color="gray")
@@ -71,13 +69,15 @@ class App(ctk.CTk):
         self.pause_button.grid(row=2, column=1, padx=(5, 20), pady=0)
 
     def format_time(self):
-        """Метод-помощник для превращения секунд в 00:00"""
         minutes = self.time_left // 60
         seconds = self.time_left % 60
         return f"{minutes:02d}:{seconds:02d}"
+    
+    def play_sound(self, file):
+        threading.Thread(target=playsound, args=(file,), daemon=True).start()
+
 
     def handle_start_click(self):
-        """Логика кнопки старт/сброс"""
         if not self.is_running:
             self.start_timer()
         elif self.is_paused:
@@ -119,7 +119,6 @@ class App(ctk.CTk):
         self.session_label.configure(text=" ")
 
     def tick(self):
-        """Чистая логика тика таймера"""
         if not self.is_running or self.is_paused:
             return
 
@@ -131,13 +130,12 @@ class App(ctk.CTk):
             self.switch_mode()
 
     def switch_mode(self):
-        """Переключение между работой и отдыхом"""
         if self.is_break:
-            playsound("breakover.mp3", block=False)
+            self.play_sound("breakover.mp3")
             self.time_left = WORK_TIME
             self.is_break = False
         else:
-            playsound("timeover.mp3", block=False)
+            self.play_sound("timeover.mp3")
             self.sessions_count += 1
             self.session_label.configure(text=" " * self.sessions_count)
             self.time_left = BREAK_TIME
