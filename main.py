@@ -1,16 +1,42 @@
+import os, json
 import customtkinter as ctk
 from playsound3 import playsound
 
-# Выносим константы, чтобы менять всё в одном месте
-WORK_TIME = 25 * 60
-BREAK_TIME = 5 * 60
-FONT_NAME = "Liga SFMono Nerd Font"
+
+CONFIG_FILE = "conf.json"
+
+def load_config():
+    default_config = {
+        "window-width": 200,
+        "window-height": 180,
+        "WORKTIME": 1500, 
+        "BREAKTIME": 300,
+        "FONT": "Liga SFMono Nerd Font"
+    }
+    
+    if not os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(default_config, f, indent=4)
+        return default_config
+        
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return default_config
+    
+conf = load_config()
+
+WORK_TIME = conf.get("WORKTIME", 1500)
+BREAK_TIME = conf.get("BREAKTIME", 300)
+FONT_NAME = conf.get("FONT", "Liga SFMono Nerd Font")
+WINDOW_WIDTH = conf.get("window-width", 200)
+WINDOW_HEIGHT = conf.get("window-height", 180)
 
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Hikodoro")
-        self.geometry("400x300")
         self.resizable(False, False)
 
         # Состояние приложения
@@ -25,21 +51,22 @@ class App(ctk.CTk):
 
     def setup_ui(self):
         """Создаем все виджеты здесь, чтобы не захламлять __init__"""
-        self.session_label = ctk.CTkLabel(self, text=" ", font=(FONT_NAME, 15))
-        self.session_label.grid(row=0, column=0, padx=20, pady=10, sticky="ew")
+        self.session_label = ctk.CTkLabel(self, text=" ", font=(FONT_NAME, 15), height=1)
+        self.session_label.grid(row=0, column=0, padx=5, pady=0, sticky="ew")
 
-        timer_font = ctk.CTkFont(family=FONT_NAME, size=85, weight="bold")
+        timer_font = ctk.CTkFont(family=FONT_NAME, size=45, weight="bold")
         self.timer_label = ctk.CTkLabel(self, text=self.format_time(), font=timer_font, text_color="gray")
-        self.timer_label.grid(row=1, column=0, columnspan=2, padx=20, pady=0)
+        self.timer_label.grid(row=1, column=0, columnspan=2, padx=0, pady=0)
 
         self.start_button = ctk.CTkButton(self, text="  ", font=(FONT_NAME, 24), 
-                                          command=self.handle_start_click, fg_color="red", hover_color="darkred")
-        self.start_button.grid(row=2, column=0, padx=20, pady=20)
+                                          command=self.handle_start_click, fg_color="red", 
+                                          hover_color="darkred", width=70)
+        self.start_button.grid(row=2, column=0, padx=(20, 5), pady=0)
 
         self.pause_button = ctk.CTkButton(self, text="  ", font=(FONT_NAME, 24), 
                                           command=self.toggle_pause, state="disabled", 
-                                          fg_color="darkgray", hover_color="gray")
-        self.pause_button.grid(row=2, column=1, padx=20, pady=20)
+                                          fg_color="#595959", hover_color="#404040", width=70)
+        self.pause_button.grid(row=2, column=1, padx=(5, 20), pady=0)
 
     def format_time(self):
         """Метод-помощник для превращения секунд в 00:00"""
@@ -119,5 +146,10 @@ class App(ctk.CTk):
 
 if __name__ == "__main__":
     app = App()
+    screen_width = app.winfo_screenwidth()
+    screen_height = app.winfo_screenheight()
     app.grid_columnconfigure(0, weight=1)
+    x = screen_width - WINDOW_WIDTH - 20
+    y = screen_height - WINDOW_HEIGHT - 50 
+    app.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}+{x}+{y}")
     app.mainloop()
